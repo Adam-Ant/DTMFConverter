@@ -38,12 +38,11 @@ void setup() {
   pinMode(q1Pin, INPUT);
   pinMode(q2Pin, INPUT);
   pinMode(q3Pin, INPUT);
-  
   pinMode(q4Pin, INPUT);
   pinMode(pulsePin, OUTPUT);
+  
   // If this is LOW, relay will start active
   digitalWrite(pulsePin, HIGH);
-  Serial.begin(115200);
 }
 
 void pulseOff () {
@@ -56,11 +55,7 @@ void pulseOff () {
 void pulseOn () {
   // Turn the relay back on, then work out if we need to pulse again
   digitalWrite(pulsePin, LOW);
-  Serial.print("Before: ");
-  Serial.println(dialPulses);
   dialPulses = dialPulses - 1;
-  Serial.print("After: ");
-  Serial.println(dialPulses);
   if (dialPulses > 0) {
     Timer1.attachInterrupt(pulseOff);
     Timer1.setPeriod(onTime * 1000);
@@ -85,6 +80,10 @@ int getDTMFValue() {
   if (digitalRead(q4Pin) == HIGH) {
     DTMFRead += 8;
   }
+  if (DTMFRead == 0) {
+    // D is all off, so instead return 16 pulses. 
+    DTMFRead = 16;
+  }
   return DTMFRead;
 }
 
@@ -98,7 +97,7 @@ void loop() {
     Timer1.setPeriod(digitTime * 1000);
   }
   
-  // Look at stq pin first, if low, set back for new number
+  // Look at stq pin first, if its now low, reset stqRead for new number
   if(stqRead) {
     stqRead = digitalRead(stqPin);
   }
